@@ -21,6 +21,8 @@ import {
   Wallet,
   ImageIcon,
   Settings,
+  ArrowDown,
+  CheckCircle2,
 } from "lucide-react"
 import { GameHeader } from "@/components/game/GameHeader"
 import { CharacterProfile } from "@/components/game/CharacterProfile"
@@ -97,100 +99,81 @@ export default function GameDashboard() {
     },
   ])
 
-  const [blockchainIslands] = useState([
+  // Define the new set of blockchain islands for the bridge
+  const blockchainIslands = [
     {
       id: 1,
-      name: "Ethereum Citadel",
-      chainId: 1,
-      chain: "ethereum",
-      difficulty: 3,
-      requiredLevel: 5,
-      bridgeFee: "0.005 ETH",
-      rewards: ["ETH Rewards", "Ethereum NFTs", "Gas Optimization"],
+      name: "Ronin",
+      chain: "ronin",
       unlocked: true,
-      icon: "⚡",
-      emoji: "⚡",
-      logo: "https://cryptologos.cc/logos/ethereum-eth-logo.svg",
-      gradient: "from-blue-600 to-indigo-600",
+      logo: "/assets/ronin.jpeg",
+      gradient: "from-blue-500 to-cyan-400",
       glowColor: "#3b82f6",
-      description: "The ancient citadel of Ethereum, where smart contracts were born",
-      position: { x: 15, y: 20 },
+      emoji: "🌊",
+      description: "The journey begins and ends in the native realm.",
+      requiredLevel: 1,
+      bridgeFee: "0.001 RON",
+      position: { x: 50, y: 20 }, // Top of the circle, moved down
     },
     {
       id: 2,
-      name: "Polygon Sanctuary",
-      chainId: 137,
-      chain: "polygon",
-      difficulty: 2,
-      requiredLevel: 3,
-      bridgeFee: "0.1 MATIC",
-      rewards: ["MATIC Rewards", "Polygon NFTs", "Fast Transactions"],
-      unlocked: true,
-      icon: "🔮",
-      emoji: "🔮",
-      logo: "https://cryptologos.cc/logos/polygon-matic-logo.svg",
-      gradient: "from-purple-600 to-pink-600",
-      glowColor: "#a855f7",
-      description: "The mystical sanctuary of fast and cheap transactions",
-      position: { x: 70, y: 15 },
+      name: "Ethereum",
+      chain: "ethereum",
+      unlocked: character.level >= 5,
+      logo: "/assets/ethereum.jpeg",
+      gradient: "from-slate-400 to-slate-300",
+      glowColor: "#94a3b8",
+      emoji: "🔥",
+      description: "The ancient and powerful realm of creation.",
+      requiredLevel: 5,
+      bridgeFee: "0.005 ETH",
+      position: { x: 88, y: 45 }, // Top-right, moved down
     },
     {
       id: 3,
-      name: "Ronin Fortress",
-      chainId: 2020,
-      chain: "ronin",
-      difficulty: 7,
-      requiredLevel: 7,
-      bridgeFee: "1 RON",
-      rewards: ["RON Rewards", "Gaming NFTs", "Axie Benefits"],
-      unlocked: true,
-      icon: "🏰",
-      emoji: "🏰",
-      logo: "https://cdn.axieinfinity.com/ronin/logo.svg",
-      gradient: "from-teal-600 to-emerald-600",
-      glowColor: "#3b82f6",
-      description: "The gaming fortress built for play-to-earn adventures",
-      position: { x: 25, y: 65 },
+      name: "Base",
+      chain: "base",
+      unlocked: character.level >= 15,
+      logo: "/assets/base.jpeg",
+      gradient: "from-blue-600 to-sky-400",
+      glowColor: "#2563eb",
+      emoji: "🏗️",
+      description: "A secure, low-cost, builder-friendly chain.",
+      requiredLevel: 15,
+      bridgeFee: "0.001 ETH",
+      position: { x: 80, y: 85 }, // Bottom-right, moved down
     },
     {
       id: 4,
-      name: "Arbitrum Spire",
-      chainId: 42161,
-      chain: "arbitrum",
-      difficulty: 5,
-      requiredLevel: 6,
+      name: "Optimism",
+      chain: "optimism",
+      unlocked: character.level >= 20,
+      logo: "/assets/optimism.jpeg",
+      gradient: "from-red-500 to-orange-400",
+      glowColor: "#ef4444",
+      emoji: "💨",
+      description: "The realm of speed, efficiency, and optimism.",
+      requiredLevel: 20,
       bridgeFee: "0.002 ETH",
-      rewards: ["ARB Rewards", "L2 NFTs", "Scaling Solutions"],
-      unlocked: character.level >= 6,
-      icon: "🗼",
-      emoji: "🗼",
-      logo: "https://cryptologos.cc/logos/arbitrum-arb-logo.svg",
-      gradient: "from-cyan-600 to-blue-600",
-      glowColor: "#60a5fa",
-      description: "The towering spire of Layer 2 scaling solutions",
-      position: { x: 75, y: 70 },
+      position: { x: 20, y: 85 }, // Bottom-left, moved down
     },
     {
       id: 5,
-      name: "Celestial Nexus",
-      chainId: 999999,
-      chain: "multiverse",
-      difficulty: 12,
-      requiredLevel: 10,
-      bridgeFee: "Unknown",
-      rewards: ["Legendary NFTs", "Cross-Chain Mastery", "Ultimate Power"],
-      unlocked: false,
-      icon: "🌌",
-      emoji: "🌌",
-      logo: "https://via.placeholder.com/64x64/FFD700/000000?text=∞",
-      gradient: "from-yellow-500 to-orange-600",
-      glowColor: "#ef4444",
-      description: "The legendary nexus connecting all blockchain realms",
-      position: { x: 45, y: 40 },
+      name: "Arbitrum",
+      chain: "arbitrum",
+      unlocked: character.level >= 30,
+      logo: "/assets/arbitrum.jpeg",
+      gradient: "from-blue-400 to-sky-300",
+      glowColor: "#60a5fa",
+      emoji: "✨",
+      description: "A mysterious civilization with advanced tech.",
+      requiredLevel: 30,
+      bridgeFee: "0.002 ETH",
+      position: { x: 12, y: 45 }, // Top-left, moved down
     },
-  ])
+  ]
 
-  const [selectedRealm, setSelectedRealm] = useState<any>(null)
+  const [selectedIsland, setSelectedIsland] = useState<any>(null)
   const [showBridgeModal, setShowBridgeModal] = useState(false)
   const [bridgeStep, setBridgeStep] = useState(1)
   const [bridgeLoading, setBridgeLoading] = useState(false)
@@ -300,7 +283,7 @@ export default function GameDashboard() {
     if (!island.unlocked) return
     if (character.level < island.requiredLevel) return
 
-    setSelectedRealm(island)
+    setSelectedIsland(island)
     setShowBridgeModal(true)
     setBridgeStep(1)
   }
@@ -314,7 +297,7 @@ export default function GameDashboard() {
       setBridgeStep(3)
       setBridgeLoading(false)
       // Update current chain after successful bridge
-      setCurrentChain(selectedRealm.chain)
+      setCurrentChain(selectedIsland.chain)
       setTimeout(() => {
         setShowBridgeModal(false)
         setBridgeStep(1)
@@ -692,7 +675,87 @@ export default function GameDashboard() {
       </main>
 
       {/* Modals and Overlays */}
-      {/* ... */}
+      <AnimatePresence>
+        {showBridgeModal && selectedIsland && (
+          <motion.div
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-slate-800 border border-slate-700 rounded-2xl p-8 w-full max-w-md shadow-2xl shadow-blue-500/20"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              <h2 className="text-2xl font-bold text-white text-center mb-2">
+                Bridge NFT to {selectedIsland.name}
+              </h2>
+              <p className="text-center text-slate-400 mb-6">
+                You are about to bridge your Dragon to another realm.
+              </p>
+
+              {bridgeStep === 1 && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <div className="flex justify-between items-center bg-slate-900 p-4 rounded-lg mb-4">
+                    <span className="text-slate-400">From</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white">{currentChainInfo.name}</span>
+                      <img src={currentChainInfo.logo} alt={currentChainInfo.name} className="w-6 h-6" />
+                  </div>
+                </div>
+
+                  <div className="text-center my-4 text-slate-500">
+                    <ArrowDown className="w-6 h-6 inline-block" />
+                        </div>
+
+                  <div className="flex justify-between items-center bg-slate-900 p-4 rounded-lg mb-6">
+                    <span className="text-slate-400">To</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white">{selectedIsland.name}</span>
+                      <img src={selectedIsland.logo} alt={selectedIsland.name} className="w-6 h-6" />
+                      </div>
+                    </div>
+
+                  <div className="text-sm text-slate-400 space-y-2 mb-6">
+                        <div className="flex justify-between">
+                      <span>Bridge Fee:</span>
+                      <span className="text-white font-mono">{selectedIsland.bridgeFee}</span>
+                        </div>
+                        <div className="flex justify-between">
+                      <span>Estimated Time:</span>
+                      <span className="text-white">~5-10 minutes</span>
+                      </div>
+                    </div>
+
+                  <Button onClick={handleBridgeNFT} className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-6">
+                    {bridgeLoading ? "Bridging..." : "Confirm Bridge"}
+                          </Button>
+                  <Button onClick={() => setShowBridgeModal(false)} variant="ghost" className="w-full mt-2 text-slate-400">
+                    Cancel
+                          </Button>
+          </motion.div>
+        )}
+
+              {bridgeStep === 2 && (
+                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
+                   <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center bg-green-500/10 rounded-full border-2 border-green-500">
+                     <CheckCircle2 className="w-12 h-12 text-green-500" />
+                    </div>
+                   <h3 className="text-xl font-bold text-white">Bridge Initiated!</h3>
+                   <p className="text-slate-300 mt-2">Your dragon is on its way to {selectedIsland.name}.</p>
+                   <Button onClick={() => setShowBridgeModal(false)} className="w-full mt-6">
+                     Close
+                  </Button>
+                    </motion.div>
+                  )}
+
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

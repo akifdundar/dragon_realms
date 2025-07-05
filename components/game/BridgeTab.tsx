@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
+import { Lock } from "lucide-react"
 
 // Define types for props
 type Island = {
@@ -90,202 +91,239 @@ export const BridgeTab = ({
 }: BridgeTabProps) => {
   return (
     <motion.div
-      className="relative h-[600px] bg-gradient-to-br from-blue-900/30 via-teal-900/30 to-emerald-900/30 rounded-2xl overflow-hidden border border-teal-500/30 backdrop-blur-xl"
+      className="flex flex-col items-center gap-2 bg-gradient-to-br from-blue-900/30 via-teal-900/30 to-emerald-900/30 rounded-2xl border border-teal-500/30 backdrop-blur-xl p-4"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* Ocean Background */}
-      <div className="absolute inset-0">
-        {/* Animated Water Waves */}
-        <motion.div
-          className="absolute inset-0 opacity-30"
-          animate={{
-            backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"],
-          }}
-          transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-          style={{
-            backgroundImage: `radial-gradient(circle at 25% 25%, rgba(20, 184, 166, 0.3) 0%, transparent 50%), 
-                                     radial-gradient(circle at 75% 75%, rgba(16, 185, 129, 0.3) 0%, transparent 50%)`,
-            backgroundSize: "200px 200px",
-          }}
-        />
-
-        {/* Floating Particles */}
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-2 h-2 bg-teal-400/40 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -20, 0],
-              opacity: [0.2, 0.8, 0.2],
-              scale: [0.5, 1, 0.5],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Number.POSITIVE_INFINITY,
-              delay: Math.random() * 2,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Bridge Title with Current Chain Info */}
-      <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-20">
-        <motion.h2
-          className="text-3xl font-bold text-white text-center"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
+      {/* Top Title Area */}
+      <div className="text-center w-full px-4 pt-2">
+        <h2 className="text-3xl font-bold text-white drop-shadow-lg">
           🌉 Dragon Bridge - Blockchain Islands 🏝️
-        </motion.h2>
-        <motion.div
-          className="flex items-center justify-center gap-2 mt-2"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
-        >
+        </h2>
+        <div className="flex items-center justify-center gap-2 mt-2">
           <span className="text-slate-300">Currently on:</span>
           <Badge className={`bg-gradient-to-r ${currentChainInfo.gradient} text-white border-0`}>
             <span className="mr-1">{currentChainInfo.emoji}</span>
             {currentChainInfo.name}
           </Badge>
-        </motion.div>
-        <motion.p
-          className="text-slate-300 text-center mt-1"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.9 }}
-        >
-          Click on any island to bridge your dragon NFT
-        </motion.p>
+        </div>
+        <p className="text-slate-300 text-center mt-1">
+          Click on any available island to bridge your dragon NFT
+        </p>
       </div>
 
-      {/* Blockchain Islands */}
-      {blockchainIslands.map((island, index) => (
-        <motion.div
-          key={island.id}
-          className="absolute cursor-pointer group"
-          style={{
-            left: `${island.position.x}%`,
-            top: `${island.position.y}%`,
-          }}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: index * 0.2, type: "spring" }}
-          whileHover={island.unlocked ? { scale: 1.1, y: -5 } : {}}
-          onClick={() => handleIslandClick(island)}
-        >
-          {/* Island Base */}
+      {/* Island Map Area */}
+      <div className="relative w-full h-[550px]">
+        {/* Ocean Background */}
+        <div className="absolute inset-0">
+          {/* Animated Water Waves */}
           <motion.div
-            className={`relative w-28 h-28 ${!island.unlocked ? "opacity-50" : ""}`}
-            animate={
-              island.unlocked
-                ? {
-                    y: [0, -3, 0],
-                  }
-                : {}
-            }
-            transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
-          >
-            {/* New Island Design with Logo */}
-            <div className="absolute inset-0 flex items-center justify-center">
-               <IslandBase island={island} />
-            </div>
+            className="absolute inset-0 opacity-30"
+            animate={{
+              backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"],
+            }}
+            transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+            style={{
+              backgroundImage: `radial-gradient(circle at 25% 25%, rgba(20, 184, 166, 0.3) 0%, transparent 50%), 
+                                       radial-gradient(circle at 75% 75%, rgba(16, 185, 129, 0.3) 0%, transparent 50%)`,
+              backgroundSize: "200px 200px",
+            }}
+          />
 
-              {/* Chain Logo */}
-              <div className="absolute inset-0 flex items-center justify-center -translate-y-4">
-                <motion.img
-                  src={island.logo}
-                  alt={`${island.name} Logo`}
-                  className="w-12 h-12 object-contain drop-shadow-lg"
-                  whileHover={{ scale: 1.2, rotate: 5 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                />
-              </div>
-
-              {/* Island Name */}
-              <div className="absolute bottom-6 w-full text-center">
-                <span className="text-white text-xs font-bold bg-black/40 px-2 py-1 rounded-full">
-                  {island.name}
-                </span>
-              </div>
-          </motion.div>
-
-          {/* Island Name Tooltip */}
-          <AnimatePresence>
-            {island.unlocked && (
-              <motion.div
-                className="absolute -bottom-20 left-1/2 transform -translate-x-1/2 bg-slate-800/90 backdrop-blur-xl border border-teal-500/50 rounded-lg p-3 min-w-48 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
-                initial={{ y: 10 }}
-                whileHover={{ y: 0 }}
-              >
-                <h4 className="text-white font-semibold text-sm flex items-center gap-2">
-                  <div className="w-5 h-5 flex items-center justify-center">
-                    <span>{island.emoji}</span>
-                  </div>
-                  {island.name}
-                </h4>
-                <p className="text-slate-300 text-xs mb-2">{island.description}</p>
-                <div className="flex justify-between text-xs mb-2">
-                  <span className="text-slate-400">Level {island.requiredLevel}+</span>
-                  <span className="text-yellow-400">{island.bridgeFee}</span>
-                </div>
-                {currentChain === island.chain && (
-                  <div className="text-green-400 text-xs font-semibold">✅ Current Chain</div>
-                )}
-                {!island.unlocked && <div className="text-red-400 text-xs mt-1">🔒 Sealed</div>}
-                {characterLevel < island.requiredLevel && (
-                  <div className="text-red-400 text-xs mt-1">📊 Level {island.requiredLevel} Required</div>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      ))}
-
-      {/* Bridge Connections - Upgraded to energy flows */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 600" preserveAspectRatio="none" style={{ zIndex: 1 }}>
-        <defs>
-          <linearGradient id="energy-flow" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="rgba(56, 189, 248, 0)" />
-            <stop offset="50%" stopColor="rgba(56, 189, 248, 0.8)" />
-            <stop offset="100%" stopColor="rgba(56, 189, 248, 0)" />
-          </linearGradient>
-        </defs>
-        {blockchainIslands.map((island, index) => {
-          if (index === 0) return null
-          const prevIsland = blockchainIslands[index - 1]
-          
-          // Convert percentage positions to absolute SVG coordinates based on viewBox
-          const x1 = prevIsland.position.x / 100 * 1000
-          const y1 = prevIsland.position.y / 100 * 600
-          const x2 = island.position.x / 100 * 1000
-          const y2 = island.position.y / 100 * 600
-
-          // Create a curved path for a more organic feel
-          const pathD = `M ${x1} ${y1} C ${(x1 + x2) / 2} ${y1 - 50}, ${(x1 + x2) / 2} ${y2 + 50}, ${x2} ${y2}`
-
-          return (
-            <motion.path
-              key={`connection-${island.id}`}
-              d={pathD}
-              stroke="url(#energy-flow)"
-              strokeWidth="3"
-              fill="none"
-              strokeDasharray="10 20"
-              initial={{ strokeDashoffset: 30 }}
-              animate={{ strokeDashoffset: 0 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          {/* Floating Particles */}
+          {[...Array(20)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 bg-teal-400/40 rounded-full"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+              }}
+              animate={{
+                y: [0, -20, 0],
+                opacity: [0.2, 0.8, 0.2],
+                scale: [0.5, 1, 0.5],
+              }}
+              transition={{
+                duration: 3 + Math.random() * 2,
+                repeat: Number.POSITIVE_INFINITY,
+                delay: Math.random() * 2,
+              }}
             />
+          ))}
+        </div>
+
+        {/* Blockchain Islands */}
+        {blockchainIslands.map((island, index) => {
+          const isOnThisChain = currentChain === island.chain
+          return (
+            <motion.div
+              key={island.id}
+              className={`absolute group ${!island.unlocked || isOnThisChain ? 'cursor-default' : 'cursor-pointer'}`}
+              style={{
+                left: `${island.position.x}%`,
+                top: `${island.position.y}%`,
+              }}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: index * 0.2, type: "spring" }}
+              whileHover={!isOnThisChain && island.unlocked ? { scale: 1.1, y: -5 } : {}}
+              onClick={() => !isOnThisChain && island.unlocked && handleIslandClick(island)}
+            >
+              {/* Island visuals... */}
+              <motion.div
+                className={`relative w-28 h-28 ${!island.unlocked ? 'opacity-50' : ''}`}
+              >
+                {/* Visual indicator for the current chain */}
+                {isOnThisChain && (
+                   <motion.div className="absolute -inset-2 rounded-full border-4 border-green-400 shadow-lg shadow-green-500/50"
+                    animate={{
+                      scale: [1, 1.05, 1],
+                      opacity: [0.8, 1, 0.8],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                   />
+                )}
+
+                {/* New Island Design with Logo */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                   <IslandBase island={island} />
+                </div>
+
+                  {/* Chain Logo */}
+                  <div className="absolute inset-0 flex items-center justify-center -translate-y-4">
+                    <motion.img
+                      src={island.logo}
+                      alt={`${island.name} Logo`}
+                      className="w-12 h-12 object-contain drop-shadow-lg"
+                      whileHover={{ scale: 1.2, rotate: 5 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    />
+                  </div>
+
+                  {/* Island Name */}
+                  <div className="absolute bottom-6 w-full text-center">
+                    <span className="text-white text-xs font-bold bg-black/40 px-2 py-1 rounded-full">
+                      {island.name}
+                    </span>
+                  </div>
+              </motion.div>
+
+              {/* Enhanced Tooltip - Now appears above the island */}
+              <AnimatePresence>
+                <div className="absolute -top-28 left-1/2 transform -translate-x-1/2 w-52 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                  <motion.div
+                    className="bg-slate-800/90 backdrop-blur-xl border border-teal-500/50 rounded-lg p-3"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    {!island.unlocked ? (
+                      // === LOCKED TOOLTIP ===
+                      <div>
+                        <h4 className="text-white font-semibold text-sm flex items-center gap-2">
+                          <Lock className="w-4 h-4 text-red-400 flex-shrink-0" />
+                          <span>{island.name}</span>
+                        </h4>
+                        <div className="text-red-400 text-xs mt-1 ml-6">
+                          Requires Level {island.requiredLevel}
+                        </div>
+                      </div>
+                    ) : (
+                      // === UNLOCKED & CURRENT CHAIN TOOLTIP ===
+                      <div>
+                        <h4 className="text-white font-semibold text-sm flex items-center gap-2">
+                          <div className="w-5 h-5 flex items-center justify-center">
+                            <span>{island.emoji}</span>
+                          </div>
+                          {island.name}
+                        </h4>
+                        <p className="text-slate-300 text-xs my-2">{island.description}</p>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-slate-400">Fee:</span>
+                          <span className="text-yellow-400 font-mono">{island.bridgeFee}</span>
+                        </div>
+                        {isOnThisChain && (
+                          <div className="text-green-400 text-xs font-semibold mt-2 pt-2 border-t border-slate-700">
+                            ✅ You are currently on this chain.
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </motion.div>
+                </div>
+              </AnimatePresence>
+            </motion.div>
           )
         })}
-      </svg>
+
+        {/* Bridge Connections - Upgraded to energy flows */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 600" preserveAspectRatio="none" style={{ zIndex: 1 }}>
+          <defs>
+            <linearGradient id="energy-flow" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="rgba(167, 139, 250, 0)" />
+              <stop offset="50%" stopColor="rgba(196, 181, 253, 1)" />
+              <stop offset="100%" stopColor="rgba(167, 139, 250, 0)" />
+            </linearGradient>
+          </defs>
+          {blockchainIslands.map((island, index) => {
+            if (index === 0) return null
+            const prevIsland = blockchainIslands[index - 1]
+            
+            // Convert percentage positions to absolute SVG coordinates based on viewBox
+            const x1 = prevIsland.position.x / 100 * 1000
+            const y1 = prevIsland.position.y / 100 * 600
+            const x2 = island.position.x / 100 * 1000
+            const y2 = island.position.y / 100 * 600
+
+            // Create a curved path for a more organic feel
+            const pathD = `M ${x1} ${y1} C ${(x1 + x2) / 2} ${y1 - 50}, ${(x1 + x2) / 2} ${y2 + 50}, ${x2} ${y2}`
+
+            return (
+              <motion.path
+                key={`connection-${island.id}`}
+                d={pathD}
+                stroke="url(#energy-flow)"
+                strokeWidth="5"
+                fill="none"
+                strokeDasharray="20 30"
+                initial={{ strokeDashoffset: 50 }}
+                animate={{ strokeDashoffset: 0 }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              />
+            )
+          })}
+
+          {/* Add a final connection from the last island back to the first one to complete the circle */}
+          {blockchainIslands.length > 1 && (() => {
+            const lastIsland = blockchainIslands[blockchainIslands.length - 1];
+            const firstIsland = blockchainIslands[0];
+            
+            const x1 = lastIsland.position.x / 100 * 1000;
+            const y1 = lastIsland.position.y / 100 * 600;
+            const x2 = firstIsland.position.x / 100 * 1000;
+            const y2 = firstIsland.position.y / 100 * 600;
+
+            const pathD = `M ${x1} ${y1} C ${(x1 + x2) / 2} ${y1 + 50}, ${(x1 + x2) / 2} ${y2 - 50}, ${x2} ${y2}`;
+
+            return (
+              <motion.path
+                key="connection-loop"
+                d={pathD}
+                stroke="url(#energy-flow)"
+                strokeWidth="5"
+                fill="none"
+                strokeDasharray="20 30"
+                initial={{ strokeDashoffset: 50 }}
+                animate={{ strokeDashoffset: 0 }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear", delay: blockchainIslands.length * 0.5 }}
+              />
+            );
+          })()}
+        </svg>
+      </div>
     </motion.div>
   )
 } 
