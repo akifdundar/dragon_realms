@@ -60,7 +60,7 @@ export default function GameDashboard() {
   const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number }>>([])
   const [magicCircles, setMagicCircles] = useState<Array<{ id: number; x: number; y: number; size: number }>>([])
 
-  const [quests] = useState([
+  const [quests, setQuests] = useState([
     {
       id: 1,
       title: "Stake RON Tokens",
@@ -178,6 +178,12 @@ export default function GameDashboard() {
   const [bridgeStep, setBridgeStep] = useState(1)
   const [bridgeLoading, setBridgeLoading] = useState(false)
 
+  const [showStakeModal, setShowStakeModal] = useState(false)
+  const [selectedQuest, setSelectedQuest] = useState<any>(null)
+  const [stakeAmount, setStakeAmount] = useState("")
+  const [isStaking, setIsStaking] = useState(false)
+  const [stakeStep, setStakeStep] = useState(1)
+
   const expPercentage = (character.exp / character.maxExp) * 100
   const intelligencePercentage = (character.intelligence / character.maxIntelligence) * 100
 
@@ -288,6 +294,31 @@ export default function GameDashboard() {
     setBridgeStep(1)
   }
 
+  const handleStake = async () => {
+    if (!stakeAmount || parseFloat(stakeAmount) <= 0) return
+    setIsStaking(true)
+    setStakeStep(2)
+
+    // Simulate staking process
+    setTimeout(() => {
+      setStakeStep(3)
+      setIsStaking(false)
+      // Mark the quest as completed
+      if (selectedQuest) {
+        setQuests((prevQuests) =>
+          prevQuests.map((quest) => (quest.id === selectedQuest.id ? { ...quest, completed: true } : quest))
+        )
+      }
+      // Here you would update the quest to be completed
+      // For now, let's just close the modal after a delay
+      setTimeout(() => {
+        setShowStakeModal(false)
+        setStakeStep(1)
+        // Ideally, you'd find the quest and mark it as completed in the state
+      }, 2000)
+    }, 3000)
+  }
+
   const handleBridgeNFT = async () => {
     setBridgeLoading(true)
     setBridgeStep(2)
@@ -316,6 +347,21 @@ export default function GameDashboard() {
     setCharacter(newCharacter)
     // Also scroll to top to see the change
     window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  const handleBeginQuest = (quest: any) => {
+    if (quest.completed) return
+
+    if (quest.type === "defi") {
+      setSelectedQuest(quest)
+      setShowStakeModal(true)
+      setStakeStep(1)
+      setStakeAmount("")
+    } else {
+      // Handle other quest types here if needed
+      console.log("Beginning quest:", quest.title)
+      handleClaimReward() // For non-staking quests for now
+    }
   }
 
   const handleMintNFT = () => {
@@ -639,6 +685,7 @@ export default function GameDashboard() {
                           </div>
                           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                             <Button
+                              onClick={() => handleBeginQuest(quest)}
                               disabled={quest.completed}
                               className="ml-4 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 disabled:bg-slate-600 relative overflow-hidden group shadow-lg"
                             >
@@ -676,6 +723,79 @@ export default function GameDashboard() {
 
       {/* Modals and Overlays */}
       <AnimatePresence>
+        {showStakeModal && selectedQuest && (
+          <motion.div
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-slate-800 border border-slate-700 rounded-2xl p-8 w-full max-w-md shadow-2xl shadow-teal-500/20"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              <h2 className="text-2xl font-bold text-white text-center mb-2">{selectedQuest.title}</h2>
+              <p className="text-center text-slate-400 mb-6">{selectedQuest.description}</p>
+
+              {stakeStep === 1 && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <div className="relative mb-6">
+                    <input
+                      type="number"
+                      value={stakeAmount}
+                      onChange={(e) => setStakeAmount(e.target.value)}
+                      placeholder="0.0"
+                      className="w-full bg-slate-900 p-4 rounded-lg text-white text-2xl font-mono text-right pr-24"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl font-bold">
+                      {currentChainInfo.bridgeFee.split(" ")[1]}
+                    </span>
+                  </div>
+
+                  <Button
+                    onClick={handleStake}
+                    className="w-full bg-teal-600 hover:bg-teal-700 text-lg py-6"
+                    disabled={isStaking || !stakeAmount || parseFloat(stakeAmount) <= 0}
+                  >
+                    {isStaking ? "Staking..." : `Stake ${currentChainInfo.bridgeFee.split(" ")[1]}`}
+                  </Button>
+                  <Button
+                    onClick={() => setShowStakeModal(false)}
+                    variant="ghost"
+                    className="w-full mt-2 text-slate-400"
+                  >
+                    Cancel
+                  </Button>
+                </motion.div>
+              )}
+
+              {stakeStep === 2 && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
+                  <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-teal-500 mx-auto mb-4"></div>
+                  <h3 className="text-xl font-bold text-white">Staking in Progress...</h3>
+                  <p className="text-slate-300 mt-2">Your tokens are being staked to the treasury.</p>
+                </motion.div>
+              )}
+
+              {stakeStep === 3 && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
+                  <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center bg-green-500/10 rounded-full border-2 border-green-500">
+                    <CheckCircle2 className="w-12 h-12 text-green-500" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">Stake Successful!</h3>
+                  <p className="text-slate-300 mt-2">You have earned your rewards. Your dragon grows stronger!</p>
+                  <Button onClick={() => setShowStakeModal(false)} className="w-full mt-6">
+                    Close
+                  </Button>
+                </motion.div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+
         {showBridgeModal && selectedIsland && (
           <motion.div
             className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center"
