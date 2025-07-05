@@ -70,21 +70,24 @@ export const CharacterProfile = ({
           <Card className="bg-slate-900/70 border-slate-700 backdrop-blur-xl shadow-2xl shadow-purple-500/10">
             <CardHeader className="text-center">
               <motion.div
-                className="w-32 h-32 rounded-full mx-auto mb-4 bg-gradient-to-br from-purple-600/50 to-indigo-600/50 border-2 border-purple-400 shadow-lg flex items-center justify-center overflow-hidden"
-                whileHover={{ scale: 1.05, rotate: 2 }}
+                className="w-full h-48 rounded-lg mx-auto mb-4 bg-slate-900 border-2 border-purple-400 shadow-lg flex items-center justify-center overflow-hidden"
+                whileHover={{ scale: 1.03, y: -5 }}
+                transition={{ type: 'spring', stiffness: 300 }}
               >
                 {character.image ? (
-                  <img src={character.image} alt={character.name} className="w-full h-full object-cover" />
+                  <img src={character.image} alt={character.name} className="w-full h-full object-contain" />
                 ) : (
-                  <span className="text-5xl drop-shadow-lg">🐲</span>
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-600/50 to-indigo-600/50">
+                    <span className="text-5xl drop-shadow-lg">🐲</span>
+                  </div>
                 )}
               </motion.div>
               <CardTitle className="text-2xl font-bold text-white">{character.name}</CardTitle>
               <div className="flex items-center justify-center gap-2 mt-1">
-                <Badge variant="secondary">{character.class}</Badge>
-                <Badge variant="outline" className="border-cyan-400 text-cyan-400">
-                  {character.element}
-                </Badge>
+                <Badge variant="secondary" />
+                <span className="text-sm">{character.class}</span>
+                <Badge variant="outline" className="border-cyan-400 text-cyan-400" />
+                <span className="text-sm">{character.element}</span>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">

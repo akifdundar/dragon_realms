@@ -366,27 +366,27 @@ export default function GameDashboard() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
         <Card className="w-full max-w-md mx-4 bg-slate-800/50 border-slate-700 text-white backdrop-blur-xl">
           <CardHeader className="text-center">
-            <motion.div
+              <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2, type: "spring" }}
               className="text-6xl mb-4"
             >
               🐲
-            </motion.div>
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-teal-400 via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                </motion.div>
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-teal-400 via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
               Dragon Realms
-            </CardTitle>
-            <CardDescription className="text-slate-300 text-lg mt-2">
+                </CardTitle>
+                <CardDescription className="text-slate-300 text-lg mt-2">
               Connect your Ronin wallet to enter the mystical realm.
-            </CardDescription>
-          </CardHeader>
+                </CardDescription>
+              </CardHeader>
           <CardContent>
             <div className="flex justify-center mt-4">
               <ronin-button />
-            </div>
-          </CardContent>
-        </Card>
+                </div>
+              </CardContent>
+            </Card>
       </div>
     )
   }
@@ -578,106 +578,106 @@ export default function GameDashboard() {
           {/* Top Bar (already part of header, can be removed) */}
           <div className="hidden lg:flex items-center justify-between">
             <h1 className="text-3xl font-bold text-white">Dragon Realms</h1>
-          </div>
+                      </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             {/* Main Stats and Leaderboard */}
             <div className="xl:col-span-2 space-y-8">
               {/* Other content here */}
-            </div>
+                    </div>
 
             {/* Side Panel - Activity Feed */}
             <div className="space-y-6">
               {/* Other content here */}
-            </div>
-          </div>
+                    </div>
+                  </div>
 
-          {/* Enhanced Tabs with Ocean/Forest Theme */}
-          <motion.div variants={itemVariants}>
+        {/* Enhanced Tabs with Ocean/Forest Theme */}
+        <motion.div variants={itemVariants}>
             <Tabs defaultValue="quests" className="space-y-6">
               <TabsList className="grid w-full grid-cols-2 bg-slate-800/70 backdrop-blur-xl border border-teal-500/30">
-                <TabsTrigger
-                  value="quests"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-emerald-600 transition-all duration-300"
-                >
-                  <Sword className="w-4 h-4 mr-2" />
-                  ⚔️ Dragon Quests
-                </TabsTrigger>
-                <TabsTrigger
-                  value="bridge"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-600 data-[state=active]:to-blue-600 transition-all duration-300"
-                >
-                  <ArrowRightLeft className="w-4 h-4 mr-2" />🌉 Dragon Bridge
-                </TabsTrigger>
-              </TabsList>
+              <TabsTrigger
+                value="quests"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-emerald-600 transition-all duration-300"
+              >
+                <Sword className="w-4 h-4 mr-2" />
+                ⚔️ Dragon Quests
+              </TabsTrigger>
+              <TabsTrigger
+                value="bridge"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-600 data-[state=active]:to-blue-600 transition-all duration-300"
+              >
+                <ArrowRightLeft className="w-4 h-4 mr-2" />🌉 Dragon Bridge
+              </TabsTrigger>
+            </TabsList>
 
-              {/* Enhanced Quests Tab */}
-              <TabsContent value="quests">
-                <motion.div className="grid gap-4" variants={containerVariants} initial="hidden" animate="visible">
-                  {quests.map((quest, index) => (
-                    <motion.div
-                      key={quest.id}
-                      variants={itemVariants}
-                      whileHover={{ scale: 1.02, y: -5 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      <Card className="bg-slate-800/70 border-slate-700 backdrop-blur-xl hover:border-teal-500/50 transition-all duration-300 relative overflow-hidden group shadow-lg shadow-teal-500/10">
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-r from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100"
-                          transition={{ duration: 0.3 }}
-                        />
-                        <CardContent className="p-6 relative z-10">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <motion.h3 className="text-lg font-semibold text-white" whileHover={{ color: "#14b8a6" }}>
-                                  🐲 {quest.title}
-                                </motion.h3>
-                                <Badge className={getDifficultyColor(quest.difficulty)}>{quest.difficulty}</Badge>
-                                {quest.completed && (
-                                  <motion.div
-                                    initial={{ scale: 0, rotate: -180 }}
-                                    animate={{ scale: 1, rotate: 0 }}
-                                    transition={{ type: "spring", delay: index * 0.1 }}
-                                  >
-                                    <Badge className="bg-green-600">
-                                      <Trophy className="w-3 h-3 mr-1" />✅ Completed
-                                    </Badge>
-                                  </motion.div>
-                                )}
-                              </div>
-                              <p className="text-slate-300 mb-2">📜 {quest.description}</p>
-                              <motion.div
-                                className="flex items-center gap-2 text-sm text-yellow-400"
-                                whileHover={{ scale: 1.05 }}
-                              >
-                                <Coins className="w-4 h-4" />💰 {quest.reward}
-                              </motion.div>
-                            </div>
-                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                              <Button
-                                disabled={quest.completed}
-                                className="ml-4 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 disabled:bg-slate-600 relative overflow-hidden group shadow-lg"
-                              >
+            {/* Enhanced Quests Tab */}
+            <TabsContent value="quests">
+              <motion.div className="grid gap-4" variants={containerVariants} initial="hidden" animate="visible">
+                {quests.map((quest, index) => (
+                  <motion.div
+                    key={quest.id}
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.02, y: -5 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Card className="bg-slate-800/70 border-slate-700 backdrop-blur-xl hover:border-teal-500/50 transition-all duration-300 relative overflow-hidden group shadow-lg shadow-teal-500/10">
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100"
+                        transition={{ duration: 0.3 }}
+                      />
+                      <CardContent className="p-6 relative z-10">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <motion.h3 className="text-lg font-semibold text-white" whileHover={{ color: "#14b8a6" }}>
+                                🐲 {quest.title}
+                              </motion.h3>
+                              <Badge className={getDifficultyColor(quest.difficulty)}>{quest.difficulty}</Badge>
+                              {quest.completed && (
                                 <motion.div
-                                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                                  initial={{ x: "-100%" }}
-                                  whileHover={{ x: "100%" }}
-                                  transition={{ duration: 0.6 }}
-                                />
-                                {quest.completed ? "✅ Completed" : "🚀 Begin Quest"}
-                              </Button>
+                                  initial={{ scale: 0, rotate: -180 }}
+                                  animate={{ scale: 1, rotate: 0 }}
+                                  transition={{ type: "spring", delay: index * 0.1 }}
+                                >
+                                  <Badge className="bg-green-600">
+                                    <Trophy className="w-3 h-3 mr-1" />✅ Completed
+                                  </Badge>
+                                </motion.div>
+                              )}
+                            </div>
+                            <p className="text-slate-300 mb-2">📜 {quest.description}</p>
+                            <motion.div
+                              className="flex items-center gap-2 text-sm text-yellow-400"
+                              whileHover={{ scale: 1.05 }}
+                            >
+                              <Coins className="w-4 h-4" />💰 {quest.reward}
                             </motion.div>
                           </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </TabsContent>
+                          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                            <Button
+                              disabled={quest.completed}
+                              className="ml-4 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 disabled:bg-slate-600 relative overflow-hidden group shadow-lg"
+                            >
+                              <motion.div
+                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                                initial={{ x: "-100%" }}
+                                whileHover={{ x: "100%" }}
+                                transition={{ duration: 0.6 }}
+                              />
+                              {quest.completed ? "✅ Completed" : "🚀 Begin Quest"}
+                            </Button>
+                          </motion.div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </TabsContent>
 
-              {/* Enhanced Dragon Bridge Tab - Blockchain Islands */}
-              <TabsContent value="bridge">
+            {/* Enhanced Dragon Bridge Tab - Blockchain Islands */}
+            <TabsContent value="bridge">
                 <BridgeTab
                   blockchainIslands={blockchainIslands}
                   handleIslandClick={handleIslandClick}
@@ -685,10 +685,10 @@ export default function GameDashboard() {
                   characterLevel={character.level}
                   currentChain={currentChain}
                 />
-              </TabsContent>
-            </Tabs>
-          </motion.div>
-        </div>
+            </TabsContent>
+          </Tabs>
+        </motion.div>
+                  </div>
       </main>
 
       {/* Modals and Overlays */}
