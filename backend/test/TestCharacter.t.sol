@@ -6,7 +6,7 @@ import {Character} from "../src/Character.sol";
 
 contract CharacterTest is Test {
     Character public character;
-    
+
     address public owner = address(this);
     address public user1 = address(0x111);
     address public user2 = address(0x222);
