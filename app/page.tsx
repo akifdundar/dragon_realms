@@ -28,6 +28,20 @@ import { GameHeader } from "@/components/game/GameHeader"
 import { CharacterProfile } from "@/components/game/CharacterProfile"
 import { BridgeTab } from "@/components/game/BridgeTab"
 
+type Quest = {
+  id: number
+  title: string
+  description: string
+  reward: string
+  difficulty: string
+  completed: boolean
+  type: string
+}
+
+type ChainQuests = {
+  [key: string]: Quest[]
+}
+
 export default function GameDashboard() {
   const address = getW3Address()
   const { disconnectW3 } = useConnect()
@@ -60,46 +74,88 @@ export default function GameDashboard() {
   const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number }>>([])
   const [magicCircles, setMagicCircles] = useState<Array<{ id: number; x: number; y: number; size: number }>>([])
 
-  const [quests, setQuests] = useState([
-    {
-      id: 1,
-      title: "Stake RON Tokens",
-      description: "Guard the ancient RON treasury with your dragon might",
-      reward: "150 EXP + 50 RON + Dragon Scale",
-      difficulty: "Easy",
-      completed: false,
-      type: "defi",
-    },
-    {
-      id: 2,
-      title: "Bridge USDC",
-      description: "Fly between realms carrying precious USDC treasures",
-      reward: "200 EXP + Bridge Fee Refund + Ancient Rune",
-      difficulty: "Medium",
-      completed: true,
-      type: "bridge",
-    },
-    {
-      id: 3,
-      title: "Defeat Shadow Dragon",
-      description: "Challenge the legendary Shadow Dragon in epic combat",
-      reward: "500 EXP + Legendary Dragon Heart + Shadow Essence",
-      difficulty: "Legendary",
-      completed: false,
-      type: "dungeon",
-    },
-    {
-      id: 4,
-      title: "Cross-Chain NFT Bridge",
-      description: "Successfully bridge an NFT between different blockchain realms",
-      reward: "300 EXP + Bridge Master Badge + Multiverse Key",
-      difficulty: "Medium",
-      completed: false,
-      type: "bridge",
-    },
-  ])
+  const chainSpecificQuests: ChainQuests = {
+    ronin: [
+      {
+        id: 1,
+        title: "Stake RON Tokens",
+        description: "Guard the ancient RON treasury with your dragon might",
+        reward: "150 EXP + 50 RON + Dragon Scale",
+        difficulty: "Easy",
+        completed: false,
+        type: "defi",
+      },
+      {
+        id: 2,
+        title: "Explore Katana DEX",
+        description: "Swap tokens on the Katana decentralized exchange.",
+        reward: "100 EXP + Katana Gem",
+        difficulty: "Easy",
+        completed: false,
+        type: "dungeon", // Using dungeon as a generic type for now
+      },
+    ],
+    ethereum: [
+      {
+        id: 1,
+        title: "Stake ETH on Lido",
+        description: "Contribute to the security of Ethereum by staking your ETH.",
+        reward: "250 EXP + stETH token",
+        difficulty: "Medium",
+        completed: false,
+        type: "defi",
+      },
+      {
+        id: 2,
+        title: "Provide Liquidity on Uniswap",
+        description: "Become a liquidity provider on the premier Ethereum DEX.",
+        reward: "300 EXP + LP Token",
+        difficulty: "Hard",
+        completed: false,
+        type: "dungeon",
+      },
+    ],
+    base: [
+      {
+        id: 1,
+        title: "Explore Base Ecosystem",
+        description: "Interact with a new dApp on the Base chain.",
+        reward: "200 EXP + Based Badge",
+        difficulty: "Medium",
+        completed: false,
+        type: "dungeon",
+      },
+    ],
+    polygon: [
+      {
+        id: 1,
+        title: "Stake MATIC Tokens",
+        description: "Secure the Polygon network by staking your MATIC.",
+        reward: "200 EXP + 10 MATIC",
+        difficulty: "Medium",
+        completed: false,
+        type: "defi",
+      },
+    ],
+    arbitrum: [
+      {
+        id: 1,
+        title: "Yield Farm on GMX",
+        description: "Explore advanced DeFi strategies on Arbitrum's top protocol.",
+        reward: "400 EXP + GMX token",
+        difficulty: "Hard",
+        completed: false,
+        type: "defi",
+      },
+    ],
+  }
 
-  // Define the new set of blockchain islands for the bridge
+  const [displayedQuests, setDisplayedQuests] = useState<Quest[]>(chainSpecificQuests[currentChain] || [])
+
+  useEffect(() => {
+    setDisplayedQuests(chainSpecificQuests[currentChain] || [])
+  }, [currentChain])
+
   const blockchainIslands = [
     {
       id: 1,
@@ -145,16 +201,16 @@ export default function GameDashboard() {
     },
     {
       id: 4,
-      name: "Optimism",
-      chain: "optimism",
+      name: "Polygon",
+      chain: "polygon",
       unlocked: character.level >= 20,
-      logo: "/assets/optimism.jpeg",
-      gradient: "from-red-500 to-orange-400",
-      glowColor: "#ef4444",
-      emoji: "💨",
-      description: "The realm of speed, efficiency, and optimism.",
+      logo: "/assets/polygon.jpeg",
+      gradient: "from-purple-500 to-indigo-400",
+      glowColor: "#8b5cf6",
+      emoji: "🔗",
+      description: "An interoperable, scalable Ethereum sidechain.",
       requiredLevel: 20,
-      bridgeFee: "0.002 ETH",
+      bridgeFee: "0.001 ETH",
       position: { x: 20, y: 85 }, // Bottom-left, moved down
     },
     {
@@ -305,16 +361,13 @@ export default function GameDashboard() {
       setIsStaking(false)
       // Mark the quest as completed
       if (selectedQuest) {
-        setQuests((prevQuests) =>
-          prevQuests.map((quest) => (quest.id === selectedQuest.id ? { ...quest, completed: true } : quest))
+        setDisplayedQuests((prevQuests: Quest[]) =>
+          prevQuests.map((quest: Quest) => (quest.id === selectedQuest.id ? { ...quest, completed: true } : quest))
         )
       }
-      // Here you would update the quest to be completed
-      // For now, let's just close the modal after a delay
       setTimeout(() => {
         setShowStakeModal(false)
         setStakeStep(1)
-        // Ideally, you'd find the quest and mark it as completed in the state
       }, 2000)
     }, 3000)
   }
@@ -349,28 +402,13 @@ export default function GameDashboard() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  const handleBeginQuest = (quest: any) => {
-    if (quest.completed) return
-
-    if (quest.type === "defi") {
-      setSelectedQuest(quest)
-      setShowStakeModal(true)
-      setStakeStep(1)
-      setStakeAmount("")
-    } else {
-      // Handle other quest types here if needed
-      console.log("Beginning quest:", quest.title)
-      handleClaimReward() // For non-staking quests for now
-    }
-  }
-
   const handleMintNFT = () => {
     // This is a mock minting function.
     // In a real scenario, this would interact with a smart contract.
     const newNFT = {
       id: 7,
       name: "Newly Minted Dragon #0001",
-      image: "/placeholder.svg?height=300&width=300",
+      image: "/assets/cannes.jpg",
       chain: "ronin",
       chainName: "Ronin",
       chainEmoji: "🏰",
@@ -386,7 +424,38 @@ export default function GameDashboard() {
     }
     setUserNFT(newNFT)
     // Also select this new NFT as the main character
-    handleNFTClick(newNFT)
+    // Set low base stats for the newly minted dragon
+    const newCharacter = {
+      ...character,
+      name: newNFT.name,
+      level: 1,
+      exp: 0,
+      class: newNFT.attributes.find((attr: any) => attr.trait_type === "Class")?.value || newNFT.rarity,
+      element: newNFT.attributes.find((attr: any) => attr.trait_type === "Element")?.value || "Unknown",
+      image: newNFT.image,
+      intelligence: 15,
+      spellPower: 20,
+      knowledge: 18,
+      wisdom: 12,
+      magicMastery: 10,
+    }
+    setCharacter(newCharacter)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  const handleBeginQuest = (quest: any) => {
+    if (quest.completed) return
+
+    if (quest.type === "defi") {
+      setSelectedQuest(quest)
+      setShowStakeModal(true)
+      setStakeStep(1)
+      setStakeAmount("")
+    } else {
+      // Handle other quest types here if needed
+      console.log("Beginning quest:", quest.title)
+      handleClaimReward() // For non-staking quests for now
+    }
   }
 
   // Show a loading or connect state if wallet is not connected
@@ -416,6 +485,39 @@ export default function GameDashboard() {
                 </div>
               </CardContent>
             </Card>
+      </div>
+    )
+  }
+
+  // If wallet is connected but user has no NFT, show Minting Page
+  if (!userNFT) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
+        <Card className="w-full max-w-md mx-4 bg-slate-800/50 border-slate-700 text-white backdrop-blur-xl">
+          <CardHeader className="text-center">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, type: "spring" }}
+              className="text-6xl mb-4"
+            >
+              🐉
+            </motion.div>
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-teal-400 via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+              Claim Your Dragon
+            </CardTitle>
+            <CardDescription className="text-slate-300 text-lg mt-2">
+              You don&apos;t have a dragon yet. Mint your first Dragon NFT to begin your adventure in Dragon Realms.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-center mt-4">
+              <Button onClick={handleMintNFT} className="w-full bg-teal-600 hover:bg-teal-700 text-lg py-6">
+                Mint Your First Dragon
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -643,7 +745,7 @@ export default function GameDashboard() {
             {/* Enhanced Quests Tab */}
             <TabsContent value="quests">
               <motion.div className="grid gap-4" variants={containerVariants} initial="hidden" animate="visible">
-                {quests.map((quest, index) => (
+                {displayedQuests.map((quest: Quest, index: number) => (
                   <motion.div
                     key={quest.id}
                     variants={itemVariants}
@@ -760,7 +862,7 @@ export default function GameDashboard() {
                     className="w-full bg-teal-600 hover:bg-teal-700 text-lg py-6"
                     disabled={isStaking || !stakeAmount || parseFloat(stakeAmount) <= 0}
                   >
-                    {isStaking ? "Staking..." : `Stake ${currentChainInfo.bridgeFee.split(" ")[1]}`}
+                    {isStaking ? "Staking..." : `Stake ${currentChainInfo.bridgeFee.split(" ")[1] || "Tokens"}`}
                   </Button>
                   <Button
                     onClick={() => setShowStakeModal(false)}
