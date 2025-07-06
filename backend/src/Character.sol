@@ -34,6 +34,7 @@ contract Character is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentra
     uint256 private _nextTokenId;
     uint256 public constant MINT_PRICE = 0.01 ether;
     uint256 public constant COOLDOWN_PERIOD = 1 hours;
+    string private _baseTokenURI;
     
     // Base stats by class
     mapping(CharacterClass => uint256) public baseAttack;
@@ -53,6 +54,7 @@ contract Character is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentra
     event AttributeUpgraded(uint256 indexed tokenId, string attribute, uint256 newValue);
     event QuestCompleted(uint256 indexed tokenId, uint256 questId);
     event DungeonCompleted(uint256 indexed tokenId, uint256 dungeonId);
+    event BaseTokenURIUpdated(string newBaseTokenURI);
 
     // Errors
     error InsufficientPayment();
@@ -63,7 +65,8 @@ contract Character is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentra
     error InvalidClass();
     error InsufficientEnergy();
 
-    constructor() ERC721("DeFi Adventure Character", "DEFI_CHAR") Ownable(msg.sender) {
+    constructor(string memory baseTokenURI_) ERC721("DeFi Adventure Character", "DEFI_CHAR") Ownable(msg.sender) {
+        _baseTokenURI = baseTokenURI_;
         _setupBaseStats();
     }
 
@@ -98,6 +101,23 @@ contract Character is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentra
         baseSpeed[CharacterClass.Air] = 18;
         baseHealth[CharacterClass.Air] = 80;
         baseEnergy[CharacterClass.Air] = 8;
+    }
+
+    /**
+     * @dev Set the base token URI for IPFS
+     * @param baseTokenURI_ New base token URI
+     */
+    function setBaseTokenURI(string memory baseTokenURI_) external onlyOwner {
+        _baseTokenURI = baseTokenURI_;
+        emit BaseTokenURIUpdated(baseTokenURI_);
+    }
+
+    /**
+     * @dev Get the base token URI
+     * @return Base token URI
+     */
+    function getBaseTokenURI() external view returns (string memory) {
+        return _baseTokenURI;
     }
 
     /**
@@ -137,7 +157,7 @@ contract Character is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentra
      * @param tokenId Character token ID
      * @param expAmount Amount of EXP to add
      */
-    function gainExp(uint256 tokenId, uint256 expAmount) external {
+    function gainExp(uint256 tokenId, uint256 expAmount) internal {
         if (!_exists(tokenId)) revert CharacterNotFound();
         if (!authorizedContracts[msg.sender]) revert UnauthorizedContract();
         
@@ -319,7 +339,7 @@ contract Character is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentra
         return block.timestamp >= character.lastUpdated + COOLDOWN_PERIOD && character.energy > 0;
     }
 
-    /**
+    /*
      * @dev Get character attributes for display
      * @param tokenId Character token ID
      * @return attack, defense, speed, health, energy
@@ -379,11 +399,18 @@ contract Character is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentra
         CharacterData memory character = characters[tokenId];
         string memory className = _getClassName(character.class);
         
+        // If baseTokenURI is set, use it for IPFS
+        if (bytes(_baseTokenURI).length > 0) {
+            return string(abi.encodePacked(_baseTokenURI, tokenId.toString()));
+        }
+        
+        // Fallback to on-chain metadata
         return string(abi.encodePacked(
             "data:application/json;base64,",
             _base64Encode(bytes(abi.encodePacked(
                 '{"name": "', className, ' Warrior #', tokenId.toString(), '",',
                 '"description": "A brave ', className, ' warrior in the DeFi Adventure",',
+                '"image": "', _getCharacterImage(character.class), '",',
                 '"attributes": [',
                 '{"trait_type": "Level", "value": ', character.level.toString(), '},',
                 '{"trait_type": "EXP", "value": ', character.exp.toString(), '},',
@@ -398,6 +425,19 @@ contract Character is ERC721, ERC721URIStorage, ERC721Burnable, Ownable, Reentra
                 ']}'
             )))
         ));
+    }
+
+    /**
+     * @dev Get character image based on class
+     * @param class Character class
+     * @return Image URI
+     */
+    function _getCharacterImage(CharacterClass class) internal pure returns (string memory) {
+        if (class == CharacterClass.Fire) return "ipfs://QmFireCharacterImage";
+        if (class == CharacterClass.Water) return "ipfs://QmWaterCharacterImage";
+        if (class == CharacterClass.Earth) return "ipfs://QmEarthCharacterImage";
+        if (class == CharacterClass.Air) return "ipfs://QmAirCharacterImage";
+        return "ipfs://QmDefaultCharacterImage";
     }
 
     /**
