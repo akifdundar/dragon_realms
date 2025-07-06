@@ -38,6 +38,10 @@ import { GameHeader } from "@/components/game/GameHeader";
 import { CharacterProfile } from "@/components/game/CharacterProfile";
 import { BridgeTab } from "@/components/game/BridgeTab";
 import ConnectRoninWalletButton from "@/providers/connectWallet";
+import { ethers } from "ethers";
+
+// Contract address - replace with your deployed contract address
+const CHARACTER_CONTRACT_ADDRESS = "0x09aB759bbEdD5DFF65535b73cF9E22EE067E14e2";
 
 type Quest = {
   id: number;
@@ -55,6 +59,7 @@ type ChainQuests = {
 
 export default function GameDashboard() {
   const [address, setAddress] = useState<string | null>(null);
+  const [connector, setConnector] = useState<any>(null);
   const [selectedNFT, setSelectedNFT] = useState<any>(null);
   const [showNFTModal, setShowNFTModal] = useState(false);
   const [currentChain, setCurrentChain] = useState("ronin"); // Current connected chain
@@ -65,8 +70,13 @@ export default function GameDashboard() {
     setUserNFT(null);
   };
 
-  const handleWalletConnect = (connectedAddress: string) => {
-    setAddress(connectedAddress);
+  const handleWalletConnect = (connector: any) => {
+    // Get the connected address from the connector
+    connector.getAccounts().then((addresses: string[]) => {
+      if (addresses && addresses.length > 0) {
+        setAddress(addresses[0]);
+      }
+    });
   };
 
   const [character, setCharacter] = useState({
@@ -441,55 +451,212 @@ export default function GameDashboard() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleMintNFT = () => {
-    // This is a mock minting function.
-    // In a real scenario, this would interact with a smart contract.
-    const newNFT = {
-      id: 7,
-      name: "Newly Minted Dragon #0001",
-      image: "/assets/cannes.jpg",
-      chain: "ronin",
-      chainName: "Ronin",
-      chainEmoji: "🏰",
-      rarity: "Common",
-      level: 1,
-      attributes: [
-        { trait_type: "Element", value: "Hatching Fire" },
-        { trait_type: "Power Level", value: "100" },
-      ],
-      contractAddress: "0xMOCK...",
-      tokenId: "0001",
-      description: "A brand new dragon, ready for adventure.",
-    };
-    setUserNFT(newNFT);
-    // Also select this new NFT as the main character
-    // Set low base stats for the newly minted dragon
-    const newCharacter = {
-      ...character,
-      name: newNFT.name,
-      level: 1,
-      exp: 0,
-      class:
-        newNFT.attributes.find((attr: any) => attr.trait_type === "Class")
-          ?.value || newNFT.rarity,
-      element:
-        newNFT.attributes.find((attr: any) => attr.trait_type === "Element")
-          ?.value || "Unknown",
-      image: newNFT.image,
-      intelligence: 15,
-      spellPower: 20,
-      knowledge: 18,
-      wisdom: 12,
-      magicMastery: 10,
-    };
-    setCharacter(newCharacter);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const handleMintNFT = async (connector: any, characterClass: number) => {
+    if (!connector) {
+      console.error("Connector not available");
+      return;
+    }
+
+    try {
+      const addresses = await connector.getAccounts();
+      const provider = await connector.getProvider();
+
+      console.log("Minting character with class:", characterClass);
+      console.log("User address:", addresses[0]);
+      console.log("Contract address:", CHARACTER_CONTRACT_ADDRESS);
+
+      // Function signature for mintCharacter(address,uint8)
+      const functionSignature = "mintCharacter(address,uint8)";
+      const functionSelector = ethers.id(functionSignature).slice(0, 10);
+
+      // Encode parameters
+      const abiCoder = new ethers.AbiCoder();
+      const encodedParams = abiCoder.encode(
+        ["address", "uint8"],
+        [addresses[0], characterClass]
+      );
+
+      // Combine function selector with encoded parameters
+      const data = functionSelector + encodedParams.slice(2);
+
+      console.log("Encoded data:", data);
+
+      const transaction = {
+        to: CHARACTER_CONTRACT_ADDRESS,
+        from: addresses[0],
+        value: "0x2386F26FC10000", // 0.01 ETH in hex (10000000000000000 wei)
+        gas: "0x186A0", // 100,000 gas limit
+        data: data,
+      };
+
+      console.log("Transaction object:", transaction);
+
+      const transactionHash = await provider.request({
+        method: "eth_sendTransaction",
+        params: [transaction],
+      });
+
+      console.log("Transaction sent:", transactionHash);
+
+      // Wait for transaction to be mined
+      const receipt = await provider.request({
+        method: "eth_getTransactionReceipt",
+        params: [transactionHash],
+      });
+
+      console.log("Transaction receipt:", receipt);
+
+      // Create mock NFT for UI
+      const newNFT = {
+        id: Math.floor(Math.random() * 1000),
+        name: `Character #${Math.floor(Math.random() * 1000)}`,
+        image: "/assets/cannes.jpg",
+        chain: "ronin",
+        chainName: "Ronin",
+        chainEmoji: "🏰",
+        rarity: "Common",
+        level: 1,
+        attributes: [
+          {
+            trait_type: "Class",
+            value:
+              characterClass === 0
+                ? "Fire"
+                : characterClass === 1
+                ? "Water"
+                : characterClass === 2
+                ? "Earth"
+                : "Air",
+          },
+          {
+            trait_type: "Element",
+            value:
+              characterClass === 0
+                ? "Fire"
+                : characterClass === 1
+                ? "Water"
+                : characterClass === 2
+                ? "Earth"
+                : "Air",
+          },
+          { trait_type: "Power Level", value: "100" },
+        ],
+        contractAddress: CHARACTER_CONTRACT_ADDRESS,
+        tokenId: Math.floor(Math.random() * 1000).toString(),
+        description: "A newly minted character NFT.",
+      };
+
+      setUserNFT(newNFT);
+
+      // Update character stats
+      const newCharacter = {
+        ...character,
+        name: newNFT.name,
+        level: 1,
+        exp: 0,
+        class:
+          newNFT.attributes.find((attr: any) => attr.trait_type === "Class")
+            ?.value || "Unknown",
+        element:
+          newNFT.attributes.find((attr: any) => attr.trait_type === "Element")
+            ?.value || "Unknown",
+        image: newNFT.image,
+        intelligence: 15,
+        spellPower: 20,
+        knowledge: 18,
+        wisdom: 12,
+        magicMastery: 10,
+      };
+
+      setCharacter(newCharacter);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      return transactionHash;
+    } catch (error) {
+      console.error("Mint error:", error);
+      throw error;
+    }
   };
 
-  const handleBeginQuest = (quest: any) => {
+  const handleBeginQuest = async (quest: any) => {
     if (quest.completed) return;
 
-    if (quest.type === "defi") {
+    if (quest.type === "defi" && quest.title === "Stake RON Tokens") {
+      // Handle RON staking quest
+      if (!connector) {
+        console.error("Connector not available");
+        return;
+      }
+
+      try {
+        const addresses = await connector.getAccounts();
+        const provider = await connector.getProvider();
+
+        console.log("Starting RON staking quest");
+        console.log("User address:", addresses[0]);
+        console.log(
+          "Staking contract address: 0x545edb750eb8769c868429be9586f5857a768758"
+        );
+        console.log(
+          "Delegate to address: 0xf41Af21F0A800dc4d86efB14ad46cfb9884FDf38"
+        );
+
+        // Function signature for delegate(address)
+        const functionSignature = "delegate(address)";
+        const functionSelector = ethers.id(functionSignature).slice(0, 10);
+
+        // Encode parameters - delegate to the specified address
+        const abiCoder = new ethers.AbiCoder();
+        const encodedParams = abiCoder.encode(
+          ["address"],
+          ["0xf41Af21F0A800dc4d86efB14ad46cfb9884FDf38"]
+        );
+
+        // Combine function selector with encoded parameters
+        const data = functionSelector + encodedParams.slice(2);
+
+        console.log("Encoded delegate data:", data);
+
+        const transaction = {
+          to: "0x545edb750eb8769c868429be9586f5857a768758",
+          from: addresses[0],
+          value: "0x0", // No ETH value needed for delegate
+          gas: "0x186A0", // 100,000 gas limit
+          data: data,
+        };
+
+        console.log("Delegate transaction object:", transaction);
+
+        const transactionHash = await provider.request({
+          method: "eth_sendTransaction",
+          params: [transaction],
+        });
+
+        console.log("Delegate transaction sent:", transactionHash);
+
+        // Wait for transaction to be mined
+        const receipt = await provider.request({
+          method: "eth_getTransactionReceipt",
+          params: [transactionHash],
+        });
+
+        console.log("Delegate transaction receipt:", receipt);
+
+        // Mark quest as completed and give rewards
+        const updatedQuests = displayedQuests.map((q) =>
+          q.id === quest.id ? { ...q, completed: true } : q
+        );
+        setDisplayedQuests(updatedQuests);
+
+        // Give rewards
+        handleClaimReward();
+
+        console.log("RON staking quest completed successfully!");
+      } catch (error) {
+        console.error("RON staking quest error:", error);
+        alert("Failed to complete RON staking quest. Please try again.");
+      }
+    } else if (quest.type === "defi") {
       setSelectedQuest(quest);
       setShowStakeModal(true);
       setStakeStep(1);
@@ -524,7 +691,12 @@ export default function GameDashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex justify-center mt-4">
-              <ConnectRoninWalletButton onConnect={handleWalletConnect} />
+              <ConnectRoninWalletButton
+                onConnect={(connector) => {
+                  setConnector(connector);
+                  handleWalletConnect(connector);
+                }}
+              />
             </div>
           </CardContent>
         </Card>
@@ -557,7 +729,7 @@ export default function GameDashboard() {
           <CardContent>
             <div className="flex justify-center mt-4">
               <Button
-                onClick={handleMintNFT}
+                onClick={() => handleMintNFT(connector, 0)} // Default to Fire class (0)
                 className="w-full bg-teal-600 hover:bg-teal-700 text-lg py-6"
               >
                 Mint Your First Dragon

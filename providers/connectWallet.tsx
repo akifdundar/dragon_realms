@@ -10,7 +10,7 @@ import {
 } from "@sky-mavis/tanto-connect";
 
 interface ConnectRoninWalletButtonProps {
-  onConnect?: (address: string) => void;
+  onConnect?: (connector: any) => void;
 }
 
 function ConnectRoninWalletButton(props: ConnectRoninWalletButtonProps) {
@@ -55,9 +55,9 @@ function ConnectRoninWalletButton(props: ConnectRoninWalletButtonProps) {
       setConnectedAddress(connectResult.account);
       setCurrentChainId(connectResult.chainId);
 
-      // Call the onConnect callback with the connected address
+      // Call the onConnect callback with the connector
       if (props.onConnect) {
-        props.onConnect(connectResult.account);
+        props.onConnect(connector);
       }
     }
 
