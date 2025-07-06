@@ -100,6 +100,7 @@ export default function GameDashboard() {
   const [showCharacterDetails, setShowCharacterDetails] = useState(false);
   const [isLevelingUp, setIsLevelingUp] = useState(false);
   const [showRewardAnimation, setShowRewardAnimation] = useState(false);
+  const [hasUsedEnhancement, setHasUsedEnhancement] = useState(false);
   const [particles, setParticles] = useState<
     Array<{ id: number; x: number; y: number }>
   >([]);
@@ -277,6 +278,7 @@ export default function GameDashboard() {
   const [isStaking, setIsStaking] = useState(false);
   const [stakeStep, setStakeStep] = useState(1);
 
+  // Calculate percentages for progress bars
   const expPercentage = (character.exp / character.maxExp) * 100;
   const intelligencePercentage =
     (character.intelligence / character.maxIntelligence) * 100;
@@ -339,17 +341,161 @@ export default function GameDashboard() {
     },
   };
 
-  const handleLevelUp = () => {
+  const handleLevelUp = async () => {
     setIsLevelingUp(true);
-    setTimeout(() => {
-      setCharacter((prev) => ({ ...prev, level: prev.level + 1 }));
+
+    try {
+      if (!connector) {
+        console.error("Connector not available");
+        return;
+      }
+
+      const addresses = await connector.getAccounts();
+      const provider = await connector.getProvider();
+
+      console.log("Leveling up character");
+      console.log("User address:", addresses[0]);
+      console.log("Contract address:", CHARACTER_CONTRACT_ADDRESS);
+
+      // Function signature for upgradeAttribute(uint256,uint256,uint256)
+      const functionSignature = "upgradeAttribute(uint256,uint256,uint256)";
+      const functionSelector = ethers.id(functionSignature).slice(0, 10);
+
+      // Encode parameters: tokenId, attribute (0=attack, 1=defense, 2=speed, 3=health, 4=energy), amount
+      const abiCoder = new ethers.AbiCoder();
+      const encodedParams = abiCoder.encode(
+        ["uint256", "uint256", "uint256"],
+        [0, 0, 2] // tokenId=0, attribute=0 (attack), amount=2
+      );
+
+      // Combine function selector with encoded parameters
+      const data = functionSelector + encodedParams.slice(2);
+
+      console.log("Encoded upgradeAttribute data:", data);
+
+      const transaction = {
+        to: CHARACTER_CONTRACT_ADDRESS,
+        from: addresses[0],
+        value: "0x0", // No ETH value needed
+        gas: "0x186A0", // 100,000 gas limit
+        data: data,
+      };
+
+      console.log("Upgrade transaction object:", transaction);
+
+      const transactionHash = await provider.request({
+        method: "eth_sendTransaction",
+        params: [transaction],
+      });
+
+      console.log("Upgrade transaction sent:", transactionHash);
+
+      // Wait for transaction to be mined
+      const receipt = await provider.request({
+        method: "eth_getTransactionReceipt",
+        params: [transactionHash],
+      });
+
+      console.log("Upgrade transaction receipt:", receipt);
+
+      // Update local state after successful transaction
+      setTimeout(() => {
+        setCharacter((prev) => ({
+          ...prev,
+          level: prev.level + 1,
+          exp: 0,
+          maxExp: prev.maxExp + 50,
+          intelligence: prev.intelligence + 5,
+          spellPower: prev.spellPower + 5,
+          knowledge: prev.knowledge + 5,
+          wisdom: prev.wisdom + 5,
+          magicMastery: prev.magicMastery + 5,
+        }));
+        setIsLevelingUp(false);
+        setHasUsedEnhancement(false); // Reset enhancement usage on level up
+        setShowRewardAnimation(true);
+        setTimeout(() => setShowRewardAnimation(false), 3000);
+      }, 1000);
+    } catch (error) {
+      console.error("Level up error:", error);
       setIsLevelingUp(false);
-    }, 2000);
+      alert("Failed to level up. Please try again.");
+    }
   };
 
   const handleClaimReward = () => {
     setShowRewardAnimation(true);
     setTimeout(() => setShowRewardAnimation(false), 3000);
+  };
+
+  const handleEnhanceIntelligence = async () => {
+    try {
+      if (!connector) {
+        console.error("Connector not available");
+        return;
+      }
+
+      const addresses = await connector.getAccounts();
+      const provider = await connector.getProvider();
+
+      console.log("Enhancing intelligence");
+      console.log("User address:", addresses[0]);
+      console.log("Contract address:", CHARACTER_CONTRACT_ADDRESS);
+
+      // Function signature for upgradeAttribute(uint256,uint256,uint256)
+      const functionSignature = "upgradeAttribute(uint256,uint256,uint256)";
+      const functionSelector = ethers.id(functionSignature).slice(0, 10);
+
+      // Encode parameters: tokenId, attribute (0=attack, 1=defense, 2=speed, 3=health, 4=energy), amount
+      // For intelligence, we'll use a custom attribute or map it to existing ones
+      const abiCoder = new ethers.AbiCoder();
+      const encodedParams = abiCoder.encode(
+        ["uint256", "uint256", "uint256"],
+        [0, 0, 2] // tokenId=0, attribute=0 (attack), amount=2 (2% increase)
+      );
+
+      // Combine function selector with encoded parameters
+      const data = functionSelector + encodedParams.slice(2);
+
+      console.log("Encoded enhanceIntelligence data:", data);
+
+      const transaction = {
+        to: CHARACTER_CONTRACT_ADDRESS,
+        from: addresses[0],
+        value: "0x0", // No ETH value needed
+        gas: "0x186A0", // 100,000 gas limit
+        data: data,
+      };
+
+      console.log("Enhance intelligence transaction object:", transaction);
+
+      const transactionHash = await provider.request({
+        method: "eth_sendTransaction",
+        params: [transaction],
+      });
+
+      console.log("Enhance intelligence transaction sent:", transactionHash);
+
+      // Wait for transaction to be mined
+      const receipt = await provider.request({
+        method: "eth_getTransactionReceipt",
+        params: [transactionHash],
+      });
+
+      console.log("Enhance intelligence transaction receipt:", receipt);
+
+      // Update local state after successful transaction
+      setCharacter((prev) => ({
+        ...prev,
+        intelligence: Math.floor(prev.intelligence * 1.02), // 2% increase
+        maxIntelligence: Math.floor(prev.maxIntelligence * 1.02), // 2% increase
+      }));
+
+      console.log("Intelligence enhanced successfully!");
+    } catch (error) {
+      console.error("Enhance intelligence error:", error);
+      alert("Failed to enhance intelligence. Please try again.");
+    }
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -933,7 +1079,9 @@ export default function GameDashboard() {
           expPercentage={expPercentage}
           intelligencePercentage={intelligencePercentage}
           onLevelUp={handleLevelUp}
+          onEnhanceIntelligence={handleEnhanceIntelligence}
           isLevelingUp={isLevelingUp}
+          canEnhanceIntelligence={character.level > 1} // Only allow enhancement after level 1
         />
 
         {/* Right Panel - Main Content */}

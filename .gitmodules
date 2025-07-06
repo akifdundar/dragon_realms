@@ -1,0 +1,3 @@
+[submodule "backend/lib/chainlink"]
+	path = backend/lib/chainlink
+	url = https://github.com/smartcontractkit/chainlink
